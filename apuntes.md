@@ -27,8 +27,11 @@
     ```
   - una vez guardado, podemos ejecutar:
     - _$ ssh platzi_
+<<<<<<< HEAD
 
 
 ### Tmux
 
 - atajos de teclado para TMUX, [aqui](http://www.sromero.org/wiki/linux/aplicaciones/tmux).
+=======
+>>>>>>> cae962c9698d5775aab463634d1e2ed95a53abb0
