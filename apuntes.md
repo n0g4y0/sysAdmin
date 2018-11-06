@@ -26,4 +26,4 @@
         IdentityFile ~/.shh/platzi.pem
     ```
   - una vez guardado, podemos ejecutar:
-    - ssh platzi
+    - _$ ssh platzi_
