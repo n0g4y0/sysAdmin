@@ -26,4 +26,9 @@
         IdentityFile ~/.shh/platzi.pem
     ```
   - una vez guardado, podemos ejecutar:
-    - ssh platzi
+    - _$ ssh platzi_
+
+
+### Tmux
+
+- atajos de teclado para TMUX, [aqui](http://www.sromero.org/wiki/linux/aplicaciones/tmux).
