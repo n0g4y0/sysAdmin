@@ -3,7 +3,8 @@
 
 ### Manejo de Sesiones Remotas con Tmux y SSH.
 
-- lo mas recomendable es guardar las llaves SSH en la carpeta > .ssh/
+- lo mas recomendable es guardar las llaves SSH en la carpeta:
+ > .ssh/
 
 - En vez de conectarnos **asi**:
     _$ ssh -i ~/.ssh/platzi.pem ubuntu@54.196.172.97_
