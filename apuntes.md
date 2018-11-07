@@ -44,3 +44,4 @@
 - **(CTRL +b) d :** desconecta la sesion de tmux, y la guarda temporalmente.
 
 - **tmux attach :** restaura la session de terminal guardada.
+
