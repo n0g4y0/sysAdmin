@@ -36,12 +36,11 @@
   - **(CTRL + b)  c :** -> crea una nueva instancia de terminal.
   - **(CTRL + b) n :** -> es el numero de instancia que quiero ir.
   - **man tmux :** mas informacion acerca de los atajos de teclado.
-  - **(CTRL +b) ":** divide la ventana actual _VERTICALMENTE_  
-- **(CTRL +b) %:** divide la ventana actual _HORIZONTALMENTE_
+  - **(CTRL +b) " :** divide la ventana actual _VERTICALMENTE_  
+  - **(CTRL +b) % :** divide la ventana actual _HORIZONTALMENTE_
 
-- **(CTRL +b) o :** selecciona la siguiente terminal cortada, en la actual ventana.
+  - **(CTRL +b) o :** selecciona la siguiente terminal cortada, en la actual ventana.
 
-- **(CTRL +b) d :** desconecta la sesion de tmux, y la guarda temporalmente.
+  - **(CTRL +b) d :** desconecta la sesion de tmux, y la guarda temporalmente.
 
-- **tmux attach :** restaura la session de terminal guardada.
-
+  - **tmux attach :** restaura la session de terminal guardada.
