@@ -41,3 +41,52 @@
   - **(CTRL +b) o :** selecciona la siguiente terminal cortada, en la actual ventana.
   - **(CTRL +b) d :** desconecta la sesion de tmux, y la guarda temporalmente.
   - **tmux attach :** restaura la session de terminal guardada.
+
+### Directorio de archivos en linux
+
+- todo en el mundo linux (GNU-LINUX) esta representado como un archivo.
+
+```
+/bin, archivos binarios de los usuarios del sistema.
+/boot, guarda los archivos del arranque del sistema.
+/dev, guarda las definiciones de todos los dispositivos.
+/etc, archivos de configuración del sistema.
+/home, se almacenan los archivos de cada usuario.
+/lib, almacena las librerías del sistema.
+/lib64, almacena las librerias del sistema de 64 bits.
+/lost+found, espacio temporal donde se guardan datos que se recuperan despues de la caida del sistema.
+/media, cuando montamos en el sistema dispositivos, los podemos ver en esta carpeta.
+/mnt, cuando montamos en el sistema dispositivos, los podemos ver en esta carpeta.
+/opt, almacenas los programas instalados de terceros.
+/proc, sistema de archivo virtual que lo crea y destruye el sistema. Contiene informacion del mismo. (forma anarquica)
+/root, almacena los archivos del super usuario Root.
+/run, datos variables en tiempo de ejecucion. Informacion del sistema desde el ultimo booteo.
+/sbin, archivos binarios del administrador.
+/srv, archivos de datos especificos para cada servicio instalado en el sistema.
+/sys, evolucion de /proc pero localizado de forma jerarquica.
+/tmp, almacenamiento de archivos temporales .
+/usr, programas instalados por defecto.
+/var, se utiliza para guardar archivos de logs, backups, servidor web.
+
+```
+
+- El sistema Linux, **esta compilado de forma dinamica**, es decir, las librerias son necesarias para correr cualquier Binario.
+  - ejm: _FIREFOX necesita los binarios minimos para instalarse, sino, simplemente no se va a poder instalar_
+- El sistema windows tiene una forma de compilacion estatica, ya que los instaladores tienen todo el programa ahi, incluido instaladores, eso incrementa el tamaño del instalador.
+- el directorio **/root** carga con el sistema base inicial, por eso tambien no se encuentra en /home.
+- cual es la diferencia entre **/bin** y **/sbin** ? es el PATH, el **/sbin** esta listo para poder ser utilizado para un usuario ROOT, o hacerse pasar por ROOT al ejecutar un determinado comando (ejm):
+> /sbin/ifconfig (para un usuario sin privilegios de poder utilizar ese comando).
+- para saber donde esta instalado un determinado PAQUETE (PROGRAMA) (ejm):
+```
+# dpkg -L firefox
+
+```
+- **/var/mail** -> se envian los correos del sistema localmente.
+  - **/var/log** -> todos los reportes del sistema. (logs.)
+
+- el directorio mas importante : **/etc**
+  - estan todos los archivos de configuracion del sistema.
+  - No es el directorio mas pesado, pero el mas importante.
+
+- **/boot** se configura el sector de arranque, es la pieza mas importante para arrancar el sistema, (UEFI,GRUB, aqui) sin esto el sistema queda irreparable.
+  - este directorio es el unico, que no se encuentra encriptado cuando todo el sistema lo esta.
