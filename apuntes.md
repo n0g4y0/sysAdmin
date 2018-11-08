@@ -166,3 +166,24 @@
   - para busqueda, apretar el signo **_/_** dentro del comando  ´man.´
 
   - Todos los programas deben tener Documentacion.
+### Administrar Discos y particiones en Linux.
+
+- Las particiones aparecen para segmentar un disco.
+
+- Las particiones y discos duros en linux **se pueden montar** en caliente, similar a un pendrive USB.
+
+- Comandos:
+  - `dmseg` **->** lista el buffer del núcleo.
+  - `fdisk -l` **->** lista de las particiones del disco, tambien me permite **particionar** un disco.
+    - este comando actua sobre un disco duro (/dev/sdX), **NO** sobre una particion.
+
+Notas importantes
+Parámetros fdisk.
+n-> nueva partición
+d-> eliminar partición.
+t-> modificar tipo de partición.
+q-> salir sin guardar.
+w-> salir y guardar los cambios. (**guarda los cambios!!**)
+
+**NOTA**: mientras no se guarden los cambios, no afecta al disco.
+- dentro de una particion logica **(extendida)**, se pueden crear mas particiones (_actua como un contenedor_).
