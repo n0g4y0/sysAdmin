@@ -90,3 +90,79 @@
 
 - **/boot** se configura el sector de arranque, es la pieza mas importante para arrancar el sistema, (UEFI,GRUB, aqui) sin esto el sistema queda irreparable.
   - este directorio es el unico, que no se encuentra encriptado cuando todo el sistema lo esta.
+
+### Repositorios
+
+- son la fuente de Software oficial de una determinada distribucion, ademas se puede agregar manualmente otros No oficiales.
+
+- con la opcion: **_# apt-get update_** actualiza toda la lista de configuraciones de paquetes.
+
+- cada uno de los repositorios, existe con una llave (GPG).
+- la llave GPG permite saber si un repositorio es confiable o no.
+- **# apt-cache search keyring** busca los anillos de seguridad, por lo general estan instalados por defecto, sino, instalarlos, en un servidor es preferible instalar las **versiones estables**.
+
+### Como instalar paquetes
+
+- los paquetes en la mayoria de las distribuciones, ya estan compilados, lo que hace uno es simplemente `descargarlos`.
+
+- **_# apt-get_** me permite instalar paquetes o administrar los paquetes.
+  - **# apt-get remove nombre-paquete** : elimina el paquete nombrado.
+  - **# dpkg -P nombre-paquete** : elimina todo el programa mas archivos relacionados, pero no quita los programas instalados por _DEPENDENCIA._
+
+- **aptitute:** es un programa que me permite administrar o instalar componentes (similar a synaptic).
+    - **/** para buscar componentes.
+    - **+** para marcar el paquete instalar paquetes (tambien todo lo que se necesita instalar).
+
+### Empaquetar y comprimir Archivos.
+
+- *Empaquetar:* es agarrar muchos archivos y directorios y dejarlos todos en un solo archivo.
+
+- *Compresion:* Agarrar ese archivo (empaquetado) y comprimirlo.
+
+- ejm:
+
+  - para empaquetar la carpeta doc/, llamandolo _doc.tar_
+
+    >**# tar cvf doc.tar doc/**
+
+  - para compresion, utilizo gzip (le agrega un .gz al archivo):
+
+    >**# gzip -9r doc.tar**    
+
+- para descomprimir:
+
+    >**# tar xvfz doct.tar.gz**
+
+- el comando **tar** me mantiene los permisos de los archivos descomprimidos.
+
+- el sistema automaticamente crea un punto _.gz_ despues de **X** tiempo (ya sea Ngix,apache,postgresql) en el directorio **/var/log**
+(siempre pone los _logs_ comprimidos).
+
+### Compilar
+
+- en debian y ubuntu, estan precompilados los paquetes, solo hay que bajarse los binarios.
+
+1. se tiene que instalar:
+  - **_# apt-get install module-assistant_** (me permite realizar algunas configuraciones).
+
+  - - **_# m-a --help** (es una ayuda para compilar librerias o modulos que van directamente al kernel).
+
+  - - **_# m-a prepare** (Busca, dependiendo del kernel que tengamos, y va a instalar una serie de paquetes necesarios para compilar.
+
+2. Agregar la funte de datos, en el **/etc/apt/sources.list**:
+
+3. descargamos la fuente:
+
+  -   - **_# apt-get source paquete-a-descargar_** (me permite descargar todo lo relacionado a ese programa).
+
+  -   - **_# apt-get built-dep paquete_** (me permite descargar todas las dependencias que le falta al determinado programa).
+
+  -   - **_# apt-get source -b paquete-a-descargar_** (me permite compilar el determinado programa).
+
+### Documentacion.
+
+- **# zless archivo.gz** comando que me permite visualizar un archivo comprimido sin descomprimirlo.
+- los comandos **man** e **info** me permiten saber la Documentacion de un determinado programa.
+  - para busqueda, apretar el signo **_/_** dentro del comando  ´man.´
+
+  - Todos los programas deben tener Documentacion.
