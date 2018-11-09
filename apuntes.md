@@ -185,5 +185,82 @@ t-> modificar tipo de partición.
 q-> salir sin guardar.
 w-> salir y guardar los cambios. (**guarda los cambios!!**)
 
+
+
 **NOTA**: mientras no se guarden los cambios, no afecta al disco.
 - dentro de una particion logica **(extendida)**, se pueden crear mas particiones (_actua como un contenedor_).
+
+### Formateo y Montaje de particiones
+
+- El sistema de archivos es la forma como realmente se guardan los datos en la particion.
+
+- no existe un solo sistema de archivos que podamos usar, la idea siempre es saber la ventajas de cada uno de ellos.
+
+- el comando **mkfs** le da el formato a una determinada particion. (ejm):
+  - **# mkfs.vfat /dev/sdx1** _//lo formatea en FAT32(usadas en USBs windows)_
+  - **# mkfs.ext3 /dev/sdx2** _//lo formatea en EXT3 (linux)_
+
+- para montar un particion de forma **MANUAL**:
+
+```
+  mount /dev/sdx /direccion/donde/montar**
+```
+
+- para desmontar un particion de forma **MANUAL**:
+
+```
+  umount /direccion/donde/montar**
+```
+- el formato **ext4** reserva un espacio del *5%* de disco cuando se apaga el sistema (_/lost+found_), donde guarda unos nodos que es una forma en la cual salva la informacion.
+
+- antes de montar una particion, se debe asegurar que dicha particion cuente con un **formato**, sino, no se podra montar.
+
+- el formato **ZFS** no tiene soporte en linux, debido a las licencias.
+
+- para montar las particiones de forma **AUTOMATICA**:
+
+- el comando **df -h** muestra el espacio utilizado por las particiones en el sistema.
+
+  - editar el archivo **/etc/fstab**:(existen varias formas de editar dicho archivo.)
+  - ```
+    /dev/sdb1 /donde/montar ext4 defaults,discard 0 0
+
+    ```
+  o tambien:
+
+  -   ```
+      UUID:xxxxxxxxx /donde/montar extX 0 0
+
+      ```
+
+  -   una vez agregado, solo debe ejecutarse, la siguiente linea para montar la particion:
+      ```
+      # mount /donde/montar
+
+      ```
+
+
+
+
+
+### Administracion SWAP
+
+- la particion SWAP, esta dispuesta como reemplazo a la memoria RAM.
+
+- lo recomendable es ponerle 5 Gb de Swap como minimo, pero si existe la posibilidad de incrementar la RAM, hacerlo.
+
+- la memoria SWAP a comparacion de la RAM, **es lenta**, al usarlo reduce la velocidad del procesamiento del sistema, y ademas la memoria _RAM funciona a la misma velocidad del procesador._
+
+- comando **free**:
+  - me avisa el estado de la memoria RAM en general.
+
+- recomendable instalar el programa **_htop_**:
+  - **# apt-get install htop**
+  - muestra informacion mas completa.
+- cuando ya se esta por llenarse la memoria RAM, es preferible crear una particion de SWAP, se crea con el comando **fdisk.**
+  - una vez creado, se formatea con la siguiente instruccion:
+    - **# mkswap /dev/sdx5** (suponiendo que la particion es la _sdx5_)
+  - luego, Activamos la nueva particion Swap:
+    - **# swapon /dev/sdx5**
+  - para desactivar la particion swap:
+      - **# swapoff /dev/sdx5**
