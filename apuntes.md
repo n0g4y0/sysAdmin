@@ -264,3 +264,43 @@ w-> salir y guardar los cambios. (**guarda los cambios!!**)
     - **# swapon /dev/sdx5**
   - para desactivar la particion swap:
       - **# swapoff /dev/sdx5**
+
+### Generar imagenes de discos duros.
+
+- Comando **DD**: es una herramienta que me permite crear/copiar informacion de un lugar a otro.
+- la instruccion _cp -ra /var /tmp/var_:
+  - *-r* copia recursivamente.
+  - *-a* preserva los permisos, propietarios de archivos,etc.
+
+- la instruccion _du -sh_:
+  - *-s* muestra el total de cada argumento.
+  - *-h* le da un formato mas entendible (en MB,KB,GB,etc).
+
+- Para sacar una imagen de una particion, primero debe:
+
+  1. Desmontar la particion:
+    - **# umount /mnt**
+  2. sacar imagen de otra particion:
+    - **# dd if=/dev/sdb6 of=/var_new/backup_sdb6 bs=1M**
+      - opcion **bs**: va a crear bit a bit la imagen del disco duro.
+      - **if**: Input File = particion a crear
+      - **of**: Onput File = lugar donde poner la imagen, ademas del nombre de la imagen creada.
+- comando **wget [Url]**: me permite descargar desde la terminal, archivos.
+
+#### para montar una ISO.
+
+- **# modprobe loop**: el comando _modprobe_ habilita el modulo LOOP, para CD-ROMS.
+
+- **# mount debian-9.iso /tmp/ -o loop**: monta el CD-ROM correctamente.
+
+#### que tan rapido es el disco en linux?
+
+- primero creamos una imagen de 100 MB:
+  - **# dd if=/dev/zero of=/zeros100M bs=1M count=100** _//_ genera un archivo de 100 MB.
+    - _NOTA:_ **/dev/zero**: Genera un archivo lleno de ceros,en este caso llamado _zeros100M_.
+      - para ver el archivo: **# hexdump zeros100M**
+  - ejecuto el comando: **sync**: para que sincronize todos los cambios del disco duro, a veces el disco duro genera cache.
+  - si yo quisiera _leer_  los 100 MB del disco duro para ver el rendimiento o hacer *benchmark* (pruebas de rendimiento), seria:
+    - **# dd if=zeros100M of=/dev/null bs=1M**
+      - _NOTA:_ **/dev/null**: es como un dispositivo denominado _HOYO NEGRO_, todo lo que se mande ahi, va a desaparecer.
+    - una vez que termina,genera informacion sobre el rendimiento de dicho proceso.
