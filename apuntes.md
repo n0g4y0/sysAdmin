@@ -304,3 +304,96 @@ w-> salir y guardar los cambios. (**guarda los cambios!!**)
     - **# dd if=zeros100M of=/dev/null bs=1M**
       - _NOTA:_ **/dev/null**: es como un dispositivo denominado _HOYO NEGRO_, todo lo que se mande ahi, va a desaparecer.
     - una vez que termina,genera informacion sobre el rendimiento de dicho proceso.
+
+### Administrar Particiones GPT.
+- Existen 2 formas de arrancar el sistema, por UEFI, o MBR.
+  - _MBR_ es mas antiguo, la BIOS busca en los primeros 512Mb del disco, para arrancar, solo permite 4 particiones primarias.
+  - _UEFI_ o _EFI_, nacio como una extension de una interfaz para brindar seguridad, permite 128 particiones de disco duro.
+
+    - las particiones creadas por distribuciones como debian e Ubuntu ya esta soportadas en UEFI, pero se recomienda deshabilitar la opcion _SECURE BOOT_ en el menu de *UEFI*.
+
+  - **como saber que tipo de arranque tiene el disco duro**:
+    - Con la instruccion: **#fdisk -l /dev/sda**
+      - NOTA: si aparece la linea: _disklabel type: dos_; es de tipo MBR.
+- el comando **gdisk** nos permite manipular particiones GPT, asi como _fdisk_ nos permite manipular particiones dos (MBR).
+  - para instalar: **apt install gdisk**
+  - **# gdisk -l /dev/sdc** _//_ nos muestra informacion, referida a particiones GPT, en dicho disco duro.
+  - Para crear una particion, existe una gran similitud con el mecanismo del comando _fdisk_.
+
+#### Administrar Arranque del sistema GRUB  
+- Es el sistema de gestor de arranque, creado por GNU, denominado _bootloader_.
+- La ultima version modificada data del 2012.
+- muchas veces el grub, viene a ser un dolor de cabeza, si se llega a dañar.
+- los archivos que se encuentran en **/etc/grub.d/** (los cuales si pueden ser modificados), luego de compilarse, generan un archivo unico, ubicado en **/boot/grub/grub.cfg**, es _RECOMENDABLE_ no modificar ese archivo.
+
+- El GRUB siempre va en los primeros 512 bytes del disco Duro.
+
+- siempre es recomendable sacar un backup del GRUB, para esto hacemos la siguiente instruccion:
+
+  -**# dd if=/dev/sda of=/root/mbr_backup bs=512 count=1** _//_ donde *bs=512* vienen a ser los primeros 512 bytes del disco MBR.
+
+- tambien existe un comando asistente para modificar el GRUB:
+  - **# update-grub2**: comando que nos permite compilar todos los archivos de _/etc/grub.d/_ y arrancar.
+- **# grub-install /dev/sda** _// permite instalar el grub en el disco pasado como argumento._
+
+
+### Apagar Servidores de Forma Remota.
+
+- **# shutdown -r now** _// va a reiniciar el servidor._
+- **# shutdown -h now** _// se apaga el servidor, fisicamente._
+
+- En sistemas como ubuntu, debian y Red Hat, centOS, existe el comando llamado **systemctl**:
+  - **# systemtcl --help** _// me muestra las opciones disponibles._
+  - **# systemtcl reboot** _// reinicia el servidor._
+  - **# systemtcl poweroff** _// apaga el servidor._
+
+### Administrar Discos Duros con LVM
+- **LVM** nos permite realizar una configuracion de discos duros, que nos permita administrar el espacio de almacenamiento del servidor.
+
+- Es una **MUY BUENA PRACTICA** que se debe utilizar, y   porque:
+  - Me permite agrandar un disco duro en tiempo de ejecucion.
+  - Me permite agregar mas discos duros.
+  - Tener mas particiones o discos duros diferentes.
+  - En los servidores, los LVMs son muy usados.
+  - Tambien nos permite tener SNAPSHOPs.
+  - Adicionalmente se puede utilizar con RAID y multiples configuraciones.
+
+- Primeramente,instalamos la aplicacion LVMs:
+- **# apt-get install lvm2**
+- NOTA: Ante todo se debe crear la *partición* y darle el formato Linux LVM (8e) con **fdisk**.
+- **A PARTIR DE AQUI** se debe desmontar cualquier particion, ya que sino,aparecera el error de que se encuentra ocupado (busy).
+- **# pvcreate /dev/[nombre de la partición o disco]** Este comando agrega la partición a los volúmenes físicos del LVM.
+- **# pvs** _//_ me permite listar los discos duros con LVM.
+- **# pvremove /dev/[nombre particion o disco]** _//_ me permite eliminar un lvm.
+- **# pvscan** _//_ cual es la configuracion actual, en el sistema.
+
+- **# pvmove /dev/origen /dev/destino** _//_ mueve los datos desde una particion origen a una destino, para que funcione,debe tener el suficiente tamaño.
+
+- Luego de estos pasos, se puede crear un **Grupo Logico**, un grupo logico me permite _tener una especificacion fisica_, para luego sacar los volumenes logicos.
+
+- El grupo logico (o volumen) de *LVM* es como si creara una *nueva particion.*
+
+- EJM: un grupo para manejar las bases de datos.
+- **# vgcreate nombre-grupo /dev/[particion o disco a agregar]** _//_ cual es la configuracion actual, en el sistema.
+- **# vgs** _//_ me permite listar los grupos de LVMs creados.
+- **# vgextend nombre-grupo /dev/[particion o disco a agregar]** _//_ me permite agregar un disco o una particion, a un determinado **GRUPO** LVM.
+- **# vgdisplay** _//_ me muestra informacion sobre los grupos de LVM creados.
+- **# vgreduce nombre-grupo /dev/[particion o disco a agregar]** _//_ me permite *QUITAR* un disco o una particion, a un determinado **GRUPO** LVM.
+- para crear un volumen logico (LV):
+  - **# lvcreate -n postgres -L 10g databases** _//_ con esta instruccion, estoy creando un volumen llamado postgres, de 10GB, desde el GRUPO _"databases"_ previamente creado.
+  - **# lvs**   _//_ visualiza los volumenes creados.
+
+- en resumen:
+
+  **# pvs**: me permite visualizar particiones LVM .
+  **# vgs**: me permite visualizar particiones LVM virtual (denominada GRUPOS, pueden estar conformadas por varias particiones  o discos).
+  **# lvs**: me permite visualizar la particion que voy a MONTAR.
+- Dando formato:
+  **# mkfs.ext4 /dev/databases/postgres**: _//_ dandole formato a mi particion (volumen) que voy a montar.
+  - **Si quisiera extender el tamaño de esa particion:**
+
+    - **# lvextend -L +10G /dev/databases/postgres** _//_ se extiende en 10GB mas, esa particion LVM.
+    - pero para completar esa extension, se debe hacer:
+    - **# resize2fs /dev/databases/postgres** _//_ se confirma la extension de tamaño de una particion.
+    - si ya no tenemos espacio libre, para agregar a un particion, solo debemos agregar mas con la instruccion:
+      - **# vgextend nombre-grupo /dev/[particion o disco a agregar]**
