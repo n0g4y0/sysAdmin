@@ -397,3 +397,132 @@ w-> salir y guardar los cambios. (**guarda los cambios!!**)
     - **# resize2fs /dev/databases/postgres** _//_ se confirma la extension de tamaño de una particion.
     - si ya no tenemos espacio libre, para agregar a un particion, solo debemos agregar mas con la instruccion:
       - **# vgextend nombre-grupo /dev/[particion o disco a agregar]**
+
+### Arrancando el sistema, RUNLEVELS, SYSTEMD
+
+- Todo sistema que tenemos en linux, tiene una forma de Arrancar.
+- En linux por defecto, existen 6 Niveles que diferentes programas arrancan.
+  - EJM: _cada vez que necesitamos habilitar el IPTABLES, debemos habilitar la interfaz de red, y para eso cargar el modulo, para este el kernel,etc._
+
+- por defecto, los 6 niveles de servicio son:
+  1. Modo usuario.
+  2. Modo multi-usuario.
+  3. Soporte sin Red.
+  4. Soporte Con Red.
+  5. Interfaz grafica.
+  6. Reinicio.
+
+- En Linux por defecto han existido 6 niveles que todos los programas arrancan, se pueden ver en las carpetas _[/etc/rc0.d]_ hasta _[/etc/rc6.d]_.
+  - *rc0.d* : alto o cierre del sistema (apagado del sistema.)
+  - *rc0.d* : modo monousuario (me permite ver si el sistema esta en modo recovery o recuperacion).
+
+
+- Dentro de estas carpetas los archivos con **S** son de _arranque_ y **K** son de _salida_.
+
+- Hace algunos años aparecieron diferentes sistemas adicionales para poder arrancar el sistema.
+
+  - El comando **# runlevel**, me dice que en nivel de ejecucion estoy arrancando actualmente.
+  - El comando **systemd** me permite saber, todo el arbol de procesos y decir simplemente, que ciertos procesos _X_ dependen de otros procesos _Y_.
+
+- **NOTA**: actualmente se considera que modificar manualmente _/etc/init.d/nombre-servicio_ (*son Scripts*), es antiguo, ahora fue reemplazado por _systemd_, por medio de **systemctl**.
+
+  - El programa **systemctl** me interactua con el comando **systemd**.
+    - **# systemctl** _//_ me permite observar todos los servicios que yo tengo activados y el estado actual.
+
+    - **# systemctl list-dependencies sshd** _//_ me muestra las dependencias del servicio *ssh*.
+
+    - **# systemctl show ssh** _//_ Instruccion que sirve para ver el estado del servicio _nginx_.
+
+    - - **# systemctl cat nginx** _//_ Puedo ver Donde esta Arrancando el servicio, y cual es el _script_ que el utiliza.
+
+    - **# ps aux | grep ssh** _//_ Me permite ver los servicios que estan corriendo.
+
+    - **# systemctl status ssh** _//_ Me permite ver el _Estado_ del servicio.
+      - **CGroup**: es la parte de seguridad donde esta corriendo.
+
+- La Instruccion: **# kill -9 PID** _//_ Mata el proceso Respectivo.
+
+#### como evitar que maten a un determinado servicio:
+
+- **# systemctl cat cron** _//_ Me permite saber, en donde esta el script del servicio.
+
+- abrimos con un editor el servicio:
+  **# vim /lib/systemd/system/cron.service**
+  editamos la directiva **[Service]** y ponemos debajo del resto:
+    ```
+    Restart=on-failure  //reiniara en caso de falla.
+    RestartSec=2s    //reiniciara en 2 segundos.
+
+    ```
+- Ahora, se necesita Recargar el servicio:
+    - **# systemctl daemon-reload**
+    - **# systemctl restart cron**
+
+- Por si acaso, poner :
+  - **# systemctl --help** _//_ para verificar las opciones disponibles.
+
+#### Deshabilitando un servicio al inicio del sistema:
+
+  - - **# systemctl disable cron.service** _//_ desactiva el servicio cron, luego de reinicar el servidor.
+
+
+### Uso de variables de Entorno, Bashrc,Profile
+
+- `VARIABLES DE ENTORNO`: nos permiten configurar diferentes ambientes, desplegarlos, en contenedores nos permite pasar contraseñas, configurar opciones,etc.
+  - Ademas, contiene los _paths_ donde busca los binarios.
+    - EJM: **# GOOGLE="http://google.com"**
+  - para mostrarlo:
+    - **# echo $GOOGLE**
+- el comando **# export** me muestra las variables que tengo en este momento en la sesion actual, de una a otra sesion, no comparte variables.
+- En la variable **PATH** se encuentran las rutas donde se encuentran cada uno de los binarios del sistema, puede ser diferente dependiendo del usuario actual.
+
+- En el script oculto **.bashrc**, mantiene y guarda la session del usuario actual, ademas es configurable (por tanto se pueden guardar _variables_).
+  - este Script, afecta a todas las cuentas que se tratan de logear en el sistema.
+
+- El Script **.profile**, es un archivo modificable, y afecta todo lo que tenga que ver con el _bash profile._ del usuario actual.
+
+- el *PROFILE* general de todos los usuarios, se encuentra en: **/etc/profile** , tambien se la puede colocar un archivo de nombre _profile_ en **/etc/profile.d/**.
+
+  - Al final del archivo, voy a a agregar la siguiente variable de ejemplo:
+
+    > export HOME_DB="/tmp"
+
+  - Guardo, hacemos `logout` del usuario _root_, y generamos una nueva sesion, reiniciando la configuracion de las variables de entorno, asi:
+    - **# sudo su -** _//_ con el _-_, estamos confirmando que reiniciara cualquier cambio que hayamos hecho en las variables de entorno.
+
+
+
+
+
+- tambien existe un **bashrc** general, para todo el sistema, se encuentra en **/etc/bash.bashrc**.
+
+### pipes, redireccionamientos para LOGS.
+
+los informes (logs) se encuentran en **/var/log**.
+
+- La mayor parte del tiempo, los Sysadmins se la pasan viendo los LOGS, del sistema.
+
+- el comando **less** se usa para visualizar archivos (logs), lo carga de manera completa, y con la tecla  _espacio_ se puede mostrar lentamente.
+
+- el comando **more** tambien sirve para visualizar, lo carga de manera previa.
+
+- el comando **grep** es la forma mas facil de buscar un contenido dentro de muchos archivos (EJM:).
+  - **# grep -v "/js/"" prueba.txt** _//_ me mostrara las lineas que no contenga el contenido *"/js/"*.
+
+- el comando **pipe** (tuberia), manda la salida de un comando a otro, tambien me permite encadenar salidas, de varios archivos.
+
+- el comando **wc** me permite mostrar la cantidad de lineas, palabras y bytes que contiene un determinado archivo.
+
+- el comando **awk** sirve para editar texto (es un lenjuage de programacion), es muy potente, una de sus funciones, me permite obtener columnas de una salida de comandos (EJM):
+  - **# ls -l | awk '{print $1}'**
+- otros comandos:
+
+  - **sort**: me permite ordenar de un manera, la salida
+  - **uniq**: me elimina las lineas repetidas.
+  - **<,>,>>,<<**: redirecciona la salida de un determinado comando.
+  - **cat**: concatena el contenido de archivos, en uno solo.
+  - **head**: por defecto me muestra las primeras 10 lineas de un archivo.
+  - **tail**: me muestra las ultimas 10 lineas de un archivo, pero tambien me los puede mostrar en tiempo real, es decir, me muestra como va agregando en vivo nuevas lineas. (ejm):
+    - **# tail -f archivo.log**
+
+- En el archivo **/var/log/syslog** se muestra toda la informacion del servidor, que esta haciendo, si esta en linea, como se esta conectando, que servicios se estan iniciando, etc.
