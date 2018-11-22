@@ -515,6 +515,7 @@ los informes (logs) se encuentran en **/var/log**.
 
 - el comando **awk** sirve para editar texto (es un lenjuage de programacion), es muy potente, una de sus funciones, me permite obtener columnas de una salida de comandos (EJM):
   - **# ls -l | awk '{print $1}'**
+  - [tutorial mas completo sobre AWK](https://www.linuxtotal.com.mx/index.php?cont=info__tips_021)
 - otros comandos:
 
   - **sort**: me permite ordenar de un manera, la salida
@@ -526,3 +527,157 @@ los informes (logs) se encuentran en **/var/log**.
     - **# tail -f archivo.log**
 
 - En el archivo **/var/log/syslog** se muestra toda la informacion del servidor, que esta haciendo, si esta en linea, como se esta conectando, que servicios se estan iniciando, etc.
+
+### Monitorear,Eliminar y establecer Prioridades en Procesos.
+
+- En linux, todo es un proceso, todo lo que corre.
+- El proceso es el que utiliza CPU y MEMORIA.
+- Los procesos en linux estan encapsulados en sus respectivos usuarios.
+- Es recomendable que, los procesos esten ejecutados por otro usuario que no sea **ROOT**, asi encapsulamos y protegemos el sistema, sobretodo de exponer al usuario _ROOT_.
+- **# ps aux** Muestra todos los procesos que se encuentra corriendo el sistema.
+- Todo proceso en Linux tiene un identificador **(ID)**. Ese ID es único.
+- es mejor tener instalado el comando : **htop**, te muestra una informacion mas detallada de los procesos que estan corriendo.
+  - _load average_: muestra el uso del sistema (3 columnas, al los 5 minutos, a los 10 minutos)
+  - la tecla **f5**, me muestra el arbol de procesos, todos los procesos parten desde **/sbin/init**.
+    - El comando **pstree** hace exactamente lo mismo, agregando la opcion: **-p** tambien mostrara el ID del proceso.
+
+- Todo proceso en linux tiene un ID, y es unico.
+
+- Si intento matar un proceso hijo (*con kill -9 PID*)(forma incorrecta de matar un proceso.), el comando padre volvera a reiniciar el proceso, a menos que, mate al proceso _PADRE_.
+
+- Otra forma de reiniciar Procesos:
+  - **# /etc/init.d/ssh restart**.
+
+- en **htop**:
+  - _F9_: me muestra en el laberal de la terminal, todas las señales que se pueden utilizar
+- la instruccion **# kill -15 PID**, cierra de manera correcta un proceso.
+- los procesos en linux, tiene prioridad (comando **nice**)
+  - el valor **-20** es el valor de mayor prioridad en el sistema, los valores negativos son los que tiene mayor prioridad,
+  - con la intruccion: **# nice -n0 apache2** _//_ le estamos diciendo al sistema, que le de mas prioridad al proceso *apache2*.
+
+- el comando **top**, es la version mas _lite_ de Htop.
+- Es recomendable, que al ejecutar un proceso, no sea con el usuario _ROOT_, y si con otro usuario, asi se protege la cuenta de administrador **root**.
+
+### Enlaces Duros, simbolicos, y sistemas de Backups.
+
+el comando **# du -sh *** me muestra cuanto pesa cada argumento (el * me agarra todos los posibles archivos y directorio de esa ruta.)
+
+- Linux me permite crear como accesos directos a archivos o directorios.
+
+- **Enlace Simbolico**: es un acceso directo o apunta hacia algun lugar, EJM:
+  - `# ln -s /ruta/donde/quiero-apuntar nombre-del-enlace`
+
+- varios directorios hacen uso de los enlaces simbolicos, ejemplo _/bin_.
+
+- **Enlace Duro**: Apunta fisicamente al mismo archivo o directorio, por tanto, al modificar cualquier de ambos, estamos modificando el mismo archivo (EJM):
+- El comando **# tree** lista el contenido de un directorio, en formato de arbol.
+
+  - `# ln  /ruta/donde/quiero-apuntar nombre-del-enlace`
+  - NOTA:
+    - _solo se puede hacer enlaces duros de archivo, NO de directorios._
+    - _se permite crear enlaces duros, si se ENCUENTRAN EN LA MISMA PARTICION o DISCO DURO, ya que se asocia con el mismo NODO._
+
+### Manejo de Usuarios y Grupos.
+
+- Linux es un sistema multi-usuarios.
+- En distribuciones derivadas de Debian (Ubuntu,Mint,Kali), se usa comunmente la instruccion **# adduser nombre-usuario**.
+  - El Script **adduser**, por debajo utiliza, otro comando llamado: **useradd**, dicho comando es el que en realidad crea usuarios dentro del sistema.
+
+- en el archivo **_/etc/passwd_**, se encuentran todos los usuarios del sistema.
+  - estan separados por *:* y la primera parte es el nombre del usuario, seguido del ID, ID del grupo, directorio del usuario, tambien la ubicacion del bash.
+  - la instruccion **/bin/false** indica que el usuario no puede _loguearse_ y no tiene derecho a una terminal.
+  - todo usuario en el sistema
+
+- Para loguearse desde la terminal, se realiza la siguiente instruccion:
+  - `# su - nombre-usuario`
+  - agregando ese signo *-*, estoy cargando un nuevo *entorno* en la misma terminal.
+- el comando **#groups nombre-usuario** me indica, a que grupos pertenece el usuario actual.
+- Un determinado usuario del sistema, debe pertenecer a los grupos respectivos para poder tener permiso de uso.
+- Con la sintaxis: **#addgroup nombre-usuario nombre-grupo** puedo agregar un usuario a un grupo respectivo (EJM):
+  - **#addgroup ubuntu sudo**
+  - Cuando un usuario se agrega recientemente a un _grupo_ respectivo, este usuario se tiene que volver a loggear para poder usar los nuevos permisos que te da el dicho grupo.
+- En el archivo **/etc/group**, se encuentran todos los _grupos_ existentes en el sistema.
+- En el archivo **/etc/shadow**, se encuentran todos las _contraseñas_ encriptadas de los usuarios.
+  - un signo **!**, significa que el usuario no tiene una contraseña.
+  - tambien se le puede borrar la contraseña encriptada a un determinado usuario, editando este archivo **/etc/shadow**, agregando un _!_, por tanto, dicho usuario podra loguearse sin colocar contraseña alguna.
+
+  - el comando **#addgroup [nombre-del-grupo]** crea un grupo en el sistema.
+
+  - el comando **#deluser [nombre-del-usuario]** crea un grupo en el sistema.
+    - internamente utilizar el comando **userdel**.
+    - para borrar todo (usuario, grupo, y su directorio), se ejecuta el siguiente comando:
+      - **#userdel -r [nombre-usuario]**
+
+  - NOTA: el comando **getent** (GetEntry) que significa traer registro, permite acceder de forma directa a los distintos archivos _descriptivos_ del sistema y filtrar por parametros, sin necesidad de usar *cat* o *grep*.
+
+  ```
+  # getent passwd       // trae todos los registros contenidos dentro de /etc/passwd.
+
+  # getent passwd ubuntu       // para ver solo el registro del usuario ubuntu dentro de /etc/passwd.
+
+  ```
+- para editar archivos de forma segura, se lo hace con el comando **visudo**, [aqui un tutorial de VISUDO](http://rm-rf.es/visudo-vipw-y-vigr-editando-ficheros-criticos-en-linux-de-forma-segura/)
+
+- AVERIGUAR SOBRE LIMITES A LOS USUARIO O GRUPOS (servicio timeoutd, /etc/security/limits.d/timeoutd).
+
+### Generar Backup de base de datos.
+
+- Existen varias maneras de generar backups de base de datos.
+- comando *sync* obliga al sistema, a guardar los cambios guardados en cache al disco duro.
+- para la base de datos, postgres:
+  1. se instala con: _# apt-get install postgresql postgresql-contrib_.
+  2. Nos logueamos como usuario postgres: _# sudo - postgres_
+  3. **_# psql_** _//_ entramos en modo editor de base de datos.
+
+    - *\l* imprime en pantalla las bases de datos actuales.
+    - *\l+* imprime en pantalla las bases de datos actuales y el tamaño que ocupa en disco (+ info).
+    - *\q* salir.
+  4. **pg_dump --help** _//_ me muestra las opciones del comando pg_dump, que sirve para realizar backups a las bases de datos (hacerlo como usuario postgres).
+
+  5. **pg_dump [nombre-bd] > respaldo.2018.03.01.sql** _//_ (hacerlo como usuario postgres) se hace un backup completo de una base de datos, siempre es recomendable ponerle fechas.
+
+      - este backup pesa menos que la original, eso es debido a que esta forma no genera los backups de los INDICES, solo genera sintaxis SQL.
+- **dropdb [nombre-db]** _//_ borra la base de datos.
+- **createdb [nombre-db] -0 [nombre-propietario]** _//_ crea la base de datos.
+- ****
+- _PARA COPIAR DESDE UNA BACKUP A UNA BASE DE DATOS:_
+  1. **createdb [nombre-db] -0 [nombre-propietario]** _//_ crea la base de datos.
+  2. **psql [nombre-db] < [nombre-backup.sql]** _//_ mando el backup a la base de datos creada.
+
+### Uso de SOCAT y manejo de redireccionamiento de PUERTOS.
+
+- Muchas veces se necesita redireccionar puertos de un lugar a otro, cambiar protocolos, hacer tuberias.
+- el programa _SOCAT_ realiza varios de estas tareas, es un programa muy grande, la documentacion es bastante buena, es mas utilizado para redireccionar a otros puertos y equivar firewall o un proxy, como se configura:
+  - instalar con: **# apt-get install socat**
+**EJEMPLO:**
+
+- Supongamos que tenemos la ip 172.31.28.228 donde carga el apache2 (puerto 80), y queremos que haga lo mismo en el puerto 8080. *(es decir, entro al http://172.31.28.228/8080 y me cargue apache2)*, por tanto, la configuracion con *SOCAT* seria:
+  -**# socat TCP-LISTEN:8080,fork,reuseaddr TCP:localhost:80**
+   _//_ Redirecciona todo el tráfico del puerto 8080 al 80.
+
+- para esta prueba, utilizaremos el comando _netcat_, que nos permite varias cosas, para este paso, lo utilizaremos para levantar un servidor TCP de alguna informacion. :
+  - **# apt-get install netcat-openbsd**
+
+  - lo inicio con el comando **nc**.
+
+  - **# nc -l 8080** levanto el servidor, le digo que me escuche en el puerto 8080 (puerto TCP), solo soporta una conexion al tiempo.
+
+  - el comando **# netstat -an | grep 8080** me permite ver los puertos del sistema actual.
+
+  - el comando **netstat** ya no esta soportado, el reemplazo es el comando **ss**.
+
+  - Desde otra maquina ajena, ejecuto:
+    - **# telnet 172.33.44.124 8080** _//_ y puedo enviar lo que yo quiero que llegue al servidor.
+
+    - **# echo "hola como estas" | nc 172.33.44.124 8080** _//_ envio esa frase al servidor levantado, por el puerto 8080.
+
+### Tareas Programadas y como monitorearlas
+
+- *Tareas Programadas*: son de las cosas mas importantes en el sistema, ya que con ella podemos programar backups, borrar datos, agregar datos, mandar correos electronicos.
+- **CRON** es un programa por defecto en la mayoria de distribuciones linux, sirve para agendar tareas en unas horas especificas (como un temporizador).
+
+![diagrama](cron01.png)
+
+- el _crontab_ tiene 5 valores importantes,
+  - **crontab --help** _//_ nos muestra los comandos disponibles.
+  - **crontab -e** _//_ me permite editar los usuarios.
