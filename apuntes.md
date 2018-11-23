@@ -348,6 +348,9 @@ w-> salir y guardar los cambios. (**guarda los cambios!!**)
   - **# systemtcl poweroff** _// apaga el servidor._
 
 ### Administrar Discos Duros con LVM
+
+![diagrama](lvm.png)
+
 - **LVM** nos permite realizar una configuracion de discos duros, que nos permita administrar el espacio de almacenamiento del servidor.
 
 - Es una **MUY BUENA PRACTICA** que se debe utilizar, y   porque:
@@ -680,4 +683,19 @@ el comando **# du -sh *** me muestra cuanto pesa cada argumento (el * me agarra 
 
 - el _crontab_ tiene 5 valores importantes,
   - **crontab --help** _//_ nos muestra los comandos disponibles.
-  - **crontab -e** _//_ me permite editar los usuarios.
+  - **crontab -e** _//_ me permite editar el archivo crontab.
+    - EJM:
+      - **0 9 * * 1 date >> /tmp/date** _//_ guarda la fecha todos los lunes, a las 9:00 en el archivo date, en _/tmp/_
+  - Para ver que el crontab cambio, podemos observar con la siguiente instruccion:
+    - **# tail -f /var/log/syslog**
+    - En ese archivo, se registra los eventos del sistema, incluido las ejecuciones de crontab.
+
+- En el directorio **/etc/cron** se encuentra el lugar donde se puede configurar mas cosas de este comando.
+  - Dentro de este directorio, existen tareas (scripts) ya creadas en carpetas como:
+    - **cron.d/**
+    - **cron.daily**
+    - **cron.hourly*
+    - **cron.monthy**
+    - **cron.weekly**
+
+- el comando **# locate [nombre]** me permite buscar archivos dentro del sistema.
