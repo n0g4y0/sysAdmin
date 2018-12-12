@@ -699,3 +699,222 @@ el comando **# du -sh *** me muestra cuanto pesa cada argumento (el * me agarra 
     - **cron.weekly**
 
 - el comando **# locate [nombre]** me permite buscar archivos dentro del sistema.
+- Tambien se pueden colocar _SCRIPTS_ en vez de solo comandos (incluido el usuario que lo ejecuta), EJM:
+  - **0 9 * * 1 _root_ es_script.sh** _//_ incluyendo un usuario, y un archivo script.
+
+### Seguridad Del Kernel.
+
+- El kernel es la pieza fundamental de cualquier _S.O_.
+- Es el que interactua entre en HW y alguna aplicacion.
+- El kernel de linux esta muy bien asegurado.
+- el archivo que se encuentra en **/etc/security/limits.conf**
+  - todos los limites que existen en el sistema linux.
+
+  - *EJM:* para ampliar en numero de archivos abiertos en el sistema linux.
+    - **\* soft nofile 32000**
+    - **\* hard nofile 65000**
+
+  - Para obtener los nuevos cambios, se necesita reiniciar.
+
+    - con las anteriores configuraciones, le estoy diciendo al sistema que todo usuario dentro del sistema puede abrir archivos dentro de esos margenes.
+
+  - para ver las configuraciones de los limites del sistema, utilizar el comando: **#ulimit -a**
+
+    - para poder modificar cierto parametro, utilizar la instruccion: **#ulimit [parametro(puede ser -n, -p, -m ....)] [cantidad a aumentar]**, _EJM:_
+      - **#ulimit -n 4000** _//_ 4000 archivos que un determinado usuario puede abrir.
+
+      - Para guardar los cambios hechos, bastara con la instruccion **#sysctl -p** (sino funciona, tambien existe la posibilidad de reiniciar el sistema.).
+
+  - _NOTA: la configuracion anterior, es muy util cuando tenemos procesos muy concurrentes._
+  - **OTRA NOTA: mucho cuidado con las configuraciones, puede dejar bastante vulnerable al sistema con mala configuraciones en este archivo.**
+
+- Otro archivo importante se encuentra en  **/etc/sysctl.conf**
+  - Contiene opciones de configuracion sobre el kernel.
+
+      - EJM: hay una configuracion, que se debe habilitar cuando queremos hacer NAT sobre el sistema, descomentar la linea:
+      - **net.ipv4.ip.forward=1**
+      - si continua comentado, no recibe paquetes NAT.
+      - _NOTA: hay varias configuraciones posibles, inbestigar tales configuraciones.._
+
+- mas informacion acerca de comando ulimit: [aqui](https://www.networkworld.com/article/2693414/operating-systems/setting-limits-with-ulimit.html)
+
+### Permisos de archivos.
+
+- Los permisos brindan dar seguridad a cada acceso, a cada directorio, sistema de archivos,etc.
+- Solo el usuario _ROOT_ puede modificar permisos.
+- el comando **chmod** modifica los permisos(EJM):
+  - **#chmod o-r [archivo]** _//_ estoy quitando permisos de lectura a _OTROS_ usuarios (literal).
+
+- *chmod:* Cambia los permisos de lectura, escritura y ejecución de un archivo.
+
+- *chown:* Cambia el propietario del archivo.
+
+- *chgrp:* Cambia el grupo propietario del archivo.
+
+##### Permisos especiales
+
+- _setUID_(*Set User ID*): bit de permiso que es asignable a archivos ejecutables
+  - permite a un usuario QUE cuando ejecute dicho proceso, el proceso adquiera los permisos del PROPIETARIO del fichero ejecutado (*ejm: comando SUDO*).
+  - para asignar este permiso:
+    - **# chmod u+s /bin/su**
+  - para quitar este permiso:
+    - **# chmod u-s /bin/su**
+  ```
+  NOTA: se debe utilizar con cuidado este permiso, ya que permite una escalada de privilegios en el sistema.
+
+  ```
+
+- _setGID_(*Set Group ID*): bit de permiso que permite adquirir los privilegios del grupo asignado al fichero o directorio.
+  - permite a varios usuario de un mismo grupo, trabajar con recursos dentro de un directorio.
+  - para asignar este permiso:
+    - **# chmod g+s /carpeta-compartida**
+  - para quitar este permiso:
+    - **# chmod g-s /carpeta-compartida**
+
+- _sticky bit_: bit de permiso que se usa en directorios donde todos tienen ACCESO, y permite EVITAR borrar _ficheros/directorios_ de otro usuario dentro ese directorio.
+
+  - para asignar este permiso:
+    - **# chmod o+t /tmp**
+  - para quitar este permiso:
+    - **# chmod o-t /tmp**
+
+### Configuracion de RED.
+- el comando **# ifconfig**, permite saber las interfaces de red que tenemos disponibles, tambien activarlas o no, asignar IPs.
+- el comando **# dhclient [nombre-interface]** Inicializa dicha interfaz de red.
+- En el archivo **/etc/network/interfaces**, se encuentra la configuracion de las interfaces de red.
+- para poder utilizar los comandos **#ifdown [interface]** y **#ifup [interface]** , las interfaces minimamente deben tener una ip asignada.
+
+##### Como agregar multiples IPs sobre una misma interfaz de red:
+- **# ifconfig [interface]:0 192.168.1.10** _//_ donde *:X* donde _X_ indica el numero de interface virtual que queremos, seguidamente la direccion ip.
+
+- ejemplo de configuracion de ip en el archivo **/etc/network/interfaces**:
+
+```
+#iface eth0 inet estatic
+#iface eth0 inet dhcp
+#   address 192.168.0.123
+#   netmask 255.255.255.0
+#   broadcast 192.168.3.255
+#   gateway 192.168.0.2
+#   #dns -> generalmente configurado en el archivo /etc/resol.conf
+#   dns-nameservers 8.8.8.8
+#   dns-search pehik.co
+
+```
+En el archivo /etc/netowrk/interfaces las palabras claves:
+ - **auto** significa debe ser configurado en tiempo de arranque del sistema
+ - **iface** indica interfaz de
+ - **inet** viene a decir, que use la interfaz de red TCP/IP
+
+
+- el comando **# ip addr show** es una alternativa al comando _ifconfig_.
+
+- dicho comando **ip**, tiene muchisimas mas funciones que el comando _ifconfig_, tambien sus configuraciones son mas complejas.
+- para poder ver, el enrutamiento del sistema, se utiliza el comando: **# route -n**
+  - el enrutamiento, muestra todas las direcciones hacia donde fluye el trafico del sistema.
+  - este comando *route* es bastante poderoso y robusto
+  - El _enrutamiento_, a diferencia del _NAT_, el paquete no se modifica, el NAT lo enmascara por lo tanto se ve modificado.
+  - el enrutamiento es la forma como se envian paquetes por internet.
+- con el comando **# traceroute [host o ip]**, me indica detalladamente por donde pasara el paquete hacia el ip o host detallado.
+
+- para reiniciar el servicio de red:
+  - **#/etc/init.d/networking restart**
+
+- mas informacion, [aqui](https://www.linuxtrainingacademy.com/linux-ip-command-networking-cheat-sheet/)
+
+### Manejar el Firewall
+
+- El firewall es la herramienta mas importante para un SysAdmin.
+- Nos permite comunicar la informacion entre el sistema operativo y las interfaces de red.
+- Por defecto el firewall (**iptables** en distribuciones linux) tiene unas politicas generales.
+- La instruccion **#iptables -L** nos muestra una tabla de informacion sobre las cadenas de conexion o politicas:
+  - **INPUT:** Son todos los paquetes que llegan desde afuera, hacia la entrada de una interfaz.
+  - **OUTPUT:** son los paquetes que salen del equipo hacia afuera.
+  - **FORWARD:** son paquetes que atraviezan el equipo, tiene otro destinatario, pero utilizan la maquina como pasarela.
+    - Es mas utilizado para enmascarar y realizar una  NAT entre servidores o una NAT entre routers o para una red LAN interna para varios equipos.
+
+- La instruccion **#iptables -L -t nat** nos muestra una tabla de informacion sobre el protocolo NAT:
+  - opciones como:
+    - PREROUTING, INPUT, OUTPUT, POSTROUTING.
+
+- en cada una de las opciones de iptables, vienen acompañadas de politicas generales, que nos permitira conectarnos o no.
+  - ejemplo de tipos de politicas: _ACCEPT,REJECT,DROP_.
+- ejemplo: politica que rechace las conexiones entrantes por 10 segundos, pero que luego permita el ingreso..
+  - **iptables -P INPUT DROP; sleep 10; iptables -P INPUT ACCEPT**
+  - Rechazar todos los paquetes de entrada:
+    **iptables -P INPUT DROP**
+  - Aceptar conexiones de un puerto especifico
+    **iptables -A INPUT -i eth0 -p tcp --dport 22 -j ACCEPT**
+  - Guardar las reglas
+    **iptables-save > /etc/iptables.rules**
+- la politica **FLUSH** chains borra tablas de reglas anteriores.
+
+
+### NTP
+- Network Time protocol.
+- Es un servicio para sincronizar la hora del sistema.
+- para instalar en sistemas debian:
+  - **#apt-get install ntp**
+- se debe configurar, para distribuciones basadas en debian, existe otro alternativo:
+  - **#apt-get install ntpdate**
+- pero antes se debe desinstalar en ntp standar:
+  - **#dpkg -P ntp**
+- para sincronizar, la hora, solo se debe ejecutar:
+  - **#ntpdate-debian**
+- el comando **#which [nombre-binario-o-programa]**, te muestra en que ruta se encuentran un binario.
+- para cambiar manualmente la hora: **#date -s "2 OCT 2006 18:00:00"**.
+- Mediante la sincronizacion, estara constantemente sincronizando, aunque tratemos de cambiarlo manualmente, esto evita que un atacante pueda manipular la hora.
+
+### AUDITORIA DE LOGINS y LOGS.
+
+- el comando **# w** _//_ me dice que usuarios estan conectados, de donde , y que estan haciendo actualmente.
+- menos informacion, pero parecido, me muestra el comando **# who**.
+- En el archivo **/var/log/auth.log**, se encuentran todas las sesiones y todos los intentos de acceso al equipo.
+
+### TUNELES CON SSH, AUTOSSH y SOCAT
+- muchas veces se necesita abrir puertos, hacer un tunel de una conexion a otra conexion, o conexiones inversas.
+- el comando **SSH** me permite crear tuneles
+
+### BACKUP de archivos de configuracion con ETCKEEPER
+
+- todas las configuraciones del sistema, se encuentran en **/etc**, es muy importante hacer un backup de ese directorio.
+- el programa **ETCKEEPER**, es como poner el controlador de versiones, **git** dentro de **/etc**. hay que instalarlo:
+  - **#apt-get install etckeeper**
+- el programa **tig** , me permite ver los commits sobre los cambios efectuados en el sistema, es un complemento para el programa _etckeeper_ o para cualquier proyecto de **git**.
+ - hay que instalarlo:
+  - **#apt-get install tig**
+
+### Prevenir ataques con FAIL2BAN
+
+- muchas veces, los servidores estan expuestos a ataques, es lo mas normal estar expuesto a los ataques en internet.
+- el programa **fail2ban** nos permite bloquear diferentes tipos de ataque que a veces tratan de dañar el sistema.
+  - lo tendremos que instalar:
+    - **#apt-get install fail2ban**
+- una vez instalado, _fail2ban_ viene con archivos de configuracion por defecto: */etc/fail2ban/fail2ban.conf* y */etc/fail2ban/jail.conf*
+- Uno de los puertos que atacan bastante es el puerto 22 (SSH).
+- tambien tiene un directorio de politicas de filters: **/etc/fail2ban/filter.d/***.
+- para activar un servicio en _fail2ban_, modificar poner en *enabled = true* , ejemplo en un servicio de _nginx_ dentro del archivo de configuracion de *fail2ban*:
+```
+....
+....
+[nginx-http-auth]
+enabled = true  #### DEBEMOS ACTIVAR DE ESTA FORMA.
+port = http,https
+logpath= %(nginx_error_log)s
+
+....
+....
+```
+- para reiniciar el servicio de _fail2ban_:
+  - **# /etc/init.d/fail2ban restart**
+
+- el *LOG* de todos los ataques o intentos de ataques, la podemos encontrar en:
+  - **/var/log/fail2ban.log**
+- Al tener instalado, _fail2ban_ se estan evitando la mayoria de los ataques a los servidores.
+
+### Encriptacion de datos.
+- al ser SysAdmin, existe la necesidad de encriptar algo, una informacion confidencial, y luego desencriptarlo.
+- Existen 2 tipos de encriptacion: _SIMETRICA_ y _ASIMETRICA_.
+- GPG -> GNU Privacy Guard.
+  - es de uso masivo.
+  - encripta archivos, y genera un set de contraseñas.  
