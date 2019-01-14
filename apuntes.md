@@ -849,6 +849,34 @@ En el archivo /etc/netowrk/interfaces las palabras claves:
     **iptables-save > /etc/iptables.rules**
 - la politica **FLUSH** chains borra tablas de reglas anteriores.
 
+- falta profundizar.
+
+### MANEJO DE DNS y DIG
+- el DNS permite mapear un nombre a una direccion IP
+- **/etc/host**: guarda la listade IPs y nombres asignados en la maquina.
+
+- Los distintos tipos de DNS son:
+
+  - *A* - IPv4
+  - *CNAME* - nombre
+  - *MX* - correo
+  - *AAAA* - dirección IPv6
+  - *TXT* - texto
+  - *PTR* - dns reverso.
+
+- falta profundizar.
+
+##### consultar dominios.
+- apt-get install dnsutils
+- dig [linux.platzi.com] _//_ muestra los DNS oficiales
+- dig [linux.platzi.com] @[servidor DNS]  _//_ a un servidor especifico.
+
+- el comando **nslookup** permite realizar pruebas de DNS.
+  - la opcion **set=Q=ANY** nos permite ver toda la informacion de un dominio, como servidores DNS, servidores de correo,etc.
+
+
+
+
 
 ### NTP
 - Network Time protocol.
@@ -915,6 +943,96 @@ logpath= %(nginx_error_log)s
 ### Encriptacion de datos.
 - al ser SysAdmin, existe la necesidad de encriptar algo, una informacion confidencial, y luego desencriptarlo.
 - Existen 2 tipos de encriptacion: _SIMETRICA_ y _ASIMETRICA_.
+  - _SIMETRICA_: misma clave para encriptar y desencriptar.
+  - _ASIMETRICA_: se usa en el dia a dia, al revisar correo, al logearse, mayor exponente es el HTTPS,(certificados SSL, de tipo ASINcrona).
+    - Este tipo de encriptacion, tiene una llave publica y otra privada.
+    - con la llave publica se *ENCRIPTA*, y con la llave privada, se *DESENCRIPTA*.
+
 - GPG -> GNU Privacy Guard.
   - es de uso masivo.
   - encripta archivos, y genera un set de contraseñas.  
+
+- para esta ocacion, se utilizara la encriptacion *SIMETRICA*:
+ - para encriptar un archivo:
+  - **# gpg -c [nombre-archivo-encriptar]** _//_ lo encriptara en un archivo binario (*extension .gpg*).
+  - **# gpg -ca [nombre-archivo-encriptar]** _//_ lo encriptara en un formato assci (*extension .asc*).
+  - **# gpg -ca -o [nombre-archivo-salida] [nombre-archivo-encriptar]** _//_ lo encriptara, en formato _.ASC_
+
+  - **# gpg -d [nombre-archivo-encriptar]** _//_ instruccion para desencriptar en contenido de un archivo.
+
+  - La aplicacion *tudu* es un gestor de tareas minialista y rapido, donde podemos añadir las tareas pendientes, y marcar las ya realizadas.
+  - Tambien utilizada para guardar contraseñas.
+    - para instalar:
+      - **# apt-get install tudu**
+      - para ejecutarlo, simplemente ejecutar: tudu.
+
+### ENCONTRAR AL DUEÑO DEL PAQUETE.
+
+- Como encontramos, _De que paquete es un archivo?_
+  - **# dpkg -S /archivo/a/buscar**
+  - enseguida, te dice, a que programa, pertenece.
+- cuales son los paquetes, que tiene un programa?
+  - **# dpkg -L [nombre-programa]**
+  - Me mostrara la lista de paquetes, que pertenecen a dicho programa o archivos relacionados con dicho programa.
+### md5sum, integridad de archivos y paquetes.
+
+- como saber si un paquete esta _corrupto o no?_
+- se hace sumatoria binaria de un determinado archivo, similar a un hash.
+- el comando _md5sum_ realiza dicha sumatoria:
+  - **# md5sum [archivo-a-revisar]**
+- tambien,dicho comando me sirver para verificar si ciertos archivos son iguales.
+
+### COMO PODEMOS MONITOREAR SERVIDORES.
+
+- Es recomendable monitorear 5 componentes basicos:
+  - CPU.
+  - MEMORIA.
+  - I/O.
+  - CARGA.
+  - RED.
+- el comando **htop** es una herramienta muy importante de monitoreo.
+  - *LOAD AVERAGE*(carga del sistema): muestra la carga promedio:
+    - en el ultimo minuto, en los ultimos 5, en los ultimos 15 minutos.
+    - es recomendable agregar los campos de lectura y escritura del disco (*IORR,IOWR,IO*).
+    - los discos duros magneticos (Standard) alcanzan maximo, los 500 IO/s.
+    - los discos de estado solido, alcanzan los 15000 IO/s.
+- si hay muchas consultas al disco duro (base de datos), y es peor si la ocupacion de CPU es lineal.
+- si hay aplicaciones que se realizan en lenguajes como python y ruby (que no son asincronos), los procesos bloquean la CPU, por tanto, la escritura en disco se demora mucho.
+- es un detalle a considerar por ejemplo:
+  - si el CPU esta al 10%, pero el *LOAD AVERAGE* esta sobre los 6 o 7 veces superior al CPU, normalmente es un problema de IO, esta ligado a una mala aplicacion o configuracion del sistema.
+
+- para monitorear la red, se recomienda instalar el programa *ethstatus*
+ - una vez instalado, procedemos a ejecutar: **# ethtool -i [interface]**
+  - nos mostrara informacion relativo a dicha interface de red.
+  - el comando **# ethstatus -i [interface]**
+    - me permite ver el estado de la interface y tambien datos estadisticos.
+
+  - el comando **# free -m** muestra la cantidad de memoria que se ha consumido.
+
+  - existen otras herramientas de monitoreo mas avanzadas:
+
+https://newrelic.com/
+https://www.datadoghq.com/
+https://www.nagios.org/
+http://munin-monitoring.org/
+
+
+### QUE DISTRIBUCION ELEGIR.
+
+- Debian, es la distribucion mas estable en servidores.
+  - los parches de seguridad, salen a tiempo.
+- cada aplicacion, tiene su respectivo cuidado.
+- Cuando un servidor se cae, es debido a que los servicios. consumen bastante RAM, y es menor del servidor. el kernel va a terminar matando al proceso.
+- es recomendable tener una particion SWAP para tales casos.
+- si tenemos aplicaciones hechas en JAVA, se debe aumentar al servidor, bastante RAM.
+- Si tenemos en el servidor, una aplicacion que utiliza bastante base de datos, la recomendacion es poder proveer al servidor, de un disco SSD, mas que la calidad de CPU.
+- Si tenemos una aplicacion basada en node, configurar bien las conexiones TCP, para que no acaben las conexiones, o un WEB SOCKET.
+
+
+### Comando Alias
+
+- sirve para crear atajos en el sistema.
+  - sintaxis: **# alias actualizar='sudo su update'**
+  - para que no se elimine un alias, debemos guardar en el archivo de sesion del usuario. (_archivo .bashr_).
+### Variables de ENTORNO
+- para hacerlos persistentes, se les debe copiar en el archivo *$HOME/.bashrc*, tanto para variables de entorno o alias.
