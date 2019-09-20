@@ -1,5 +1,5 @@
-# Administrador de Servidores - Platzi
-- **GNU/LINUX** es el sistema operativo que es la mas usada en cuanto a los servidores.
+    # Administrador de Servidores - Platzi
+    - **GNU/LINUX** es el sistema operativo que es la mas usada en cuanto a los servidores.
 
 ### Manejo de Sesiones Remotas con Tmux y SSH.
 
